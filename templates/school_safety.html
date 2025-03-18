@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>School Safety Reports</h2>
+    <p>Select a category from the sidebar to view data.</p>
+
+    <!-- Search Bar with Autocomplete -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-6">
+            <input type="text" id="search-bar" class="form-control" placeholder="Search for a school...">
+            <div id="autocomplete-results" class="list-group" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Map Container (Moved Lower) -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-12">
+            <div id="map" style="height: 600px; width: 100%;"></div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <!-- JavaScript for Leaflet Map and Search -->
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([41.8781, -87.6298], 10); // Centered on Chicago
+
+        // Add a tile layer (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Function to add a marker for a school
+        function addMarker(school) {
+            // Clear existing markers
+            map.eachLayer(function(layer) {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            // Add a marker for the selected school
+            if (school.School_Latitude && school.School_Longitude) {
+                var marker = L.marker([school.School_Latitude, school.School_Longitude]).addTo(map);
+                marker.bindPopup(`<b>${school.Long_Name}</b>`); // Bind popup with Long_Name
+                marker.on('mouseover', function() {
+                    this.openPopup(); // Show popup on hover
+                });
+                marker.on('mouseout', function() {
+                    this.closePopup(); // Hide popup on mouseout
+                });
+                map.setView([school.School_Latitude, school.School_Longitude], 15); // Zoom to the school (1-mile radius)
+            }
+        }
+
+        // Handle search input
+        document.getElementById('search-bar').addEventListener('input', function(event) {
+            var query = event.target.value.trim();
+            var autocompleteResults = document.getElementById('autocomplete-results');
+
+            if (query.length > 0) {
+                // Fetch filtered schools from the server
+                fetch(`/search-school?query=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Clear previous results
+                        autocompleteResults.innerHTML = '';
+
+                        // Limit results to 3
+                        var limitedResults = data.slice(0, 3);
+
+                        // Display matching schools in the autocomplete dropdown
+                        if (limitedResults.length > 0) {
+                            limitedResults.forEach(function(school) {
+                                var resultItem = document.createElement('div');
+                                resultItem.className = 'list-group-item list-group-item-action';
+                                resultItem.textContent = school.Long_Name;
+                                resultItem.addEventListener('click', function() {
+                                    // When a school is clicked, add its marker to the map
+                                    addMarker(school);
+                                    // Clear the search bar and hide the dropdown
+                                    document.getElementById('search-bar').value = '';
+                                    autocompleteResults.style.display = 'none';
+                                });
+                                autocompleteResults.appendChild(resultItem);
+                            });
+                            autocompleteResults.style.display = 'block';
+                        } else {
+                            autocompleteResults.style.display = 'none';
+                        }
+                    })
+                    .catch(error => console.error('Error fetching search results:', error));
+            } else {
+                // Hide the dropdown if the search bar is empty
+                autocompleteResults.style.display = 'none';
+            }
+        });
+
+        // Hide the dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            var autocompleteResults = document.getElementById('autocomplete-results');
+            if (event.target.id !== 'search-bar') {
+                autocompleteResults.style.display = 'none';
+            }
+        });
+    </script>
+{% endblock %}

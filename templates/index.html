@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Welcome to Stay Safe Chicago</h2>
+    <p>Select a category from the sidebar to view data.</p>
+    <div class="row justify-content-center"> <!-- Center the row -->
+        <div class="col-md-12">
+            <div id="bubble-chart"></div>
+        </div>
+    </div>
+
+    <!-- D3.js Library -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- JavaScript for Bubble Chart -->
+    <script>
+        // Use the region data passed from Flask
+        const regionData = {{ region_data | tojson }};
+
+        // Filter out regions with the name "Unknown"
+        const filteredData = regionData.filter(d => d.region !== "Unknown");
+
+        // Log the data for debugging
+        console.log("Filtered Region Data:", filteredData);
+
+        // Set up the SVG canvas
+        const width = 1000;  // Increased width to move bubbles to the right
+        const height = 600;
+        const svg = d3.select("#bubble-chart")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        // Create a scale for bubble sizes
+        const maxCount = d3.max(filteredData, d => d.count);
+        const radiusScale = d3.scaleSqrt()
+            .domain([0, maxCount])
+            .range([30, 100]);  // Increased bubble size range
+
+        // Create a modern color scale for bubbles
+        const colorScale = d3.scaleOrdinal()
+            .domain(filteredData.map(d => d.region))
+            .range(["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]);
+
+        // Create a force simulation
+        const simulation = d3.forceSimulation(filteredData)
+            .force("charge", d3.forceManyBody().strength(5))  // Gentle repulsion
+            .force("center", d3.forceCenter(width * 0.6, height / 2))  // Move bubbles to the right
+            .force("collision", d3.forceCollide().radius(d => radiusScale(d.count) + 5))  // Prevent overlap
+            .force("x", d3.forceX(width * 0.6).strength(0.05))  // Anchor bubbles to the center
+            .force("y", d3.forceY(height / 2).strength(0.05))  // Anchor bubbles to the center
+            .alphaDecay(0.02)  // Gradual decay for smooth animation
+            .alpha(0.1);  // Start with a low alpha for smooth animation
+
+        // Draw bubbles
+        const bubbles = svg.selectAll("circle")
+            .data(filteredData)
+            .enter()
+            .append("circle")
+            .attr("r", d => radiusScale(d.count))
+            .attr("fill", d => colorScale(d.region))  // Assign unique colors
+            .attr("stroke", "black")
+            .attr("stroke-width", 1)
+            .on("mouseover", function(event, d) {
+                // Slightly increase the charge strength to push other bubbles
+                simulation.force("charge", d3.forceManyBody().strength(10)).restart();
+            })
+            .on("mouseout", function(event, d) {
+                // Reset the charge strength to 5
+                simulation.force("charge", d3.forceManyBody().strength(5)).restart();
+            })
+            .on("click", function(event, d) {
+                // Blow up the bubble into smaller neighborhood bubbles
+                blowUpBubble(d);
+            });
+
+        // Add labels
+        const labels = svg.selectAll("text")
+            .data(filteredData)
+            .enter()
+            .append("text")
+            .text(d => d.region)  // Display only the region name
+            .attr("text-anchor", "middle")
+            .attr("font-size", d => `${radiusScale(d.count) / 3}px`)  // Smaller font size
+            .attr("fill", "white");
+
+        // Update bubble and label positions
+        simulation.on("tick", () => {
+            bubbles
+                .attr("cx", d => d.x)
+                .attr("cy", d => d.y);
+
+            labels
+                .attr("x", d => d.x)
+                .attr("y", d => d.y);
+        });
+
+        // Function to blow up a bubble into smaller neighborhood bubbles
+        function blowUpBubble(region) {
+            // Clear the existing bubbles and labels
+            svg.selectAll("circle").remove();
+            svg.selectAll("text").remove();
+
+            // Fetch neighborhood data for the selected region (placeholder)
+            const neighborhoodData = [
+                { neighborhood: "Neighborhood A", crimes: 50 },
+                { neighborhood: "Neighborhood B", crimes: 30 },
+                { neighborhood: "Neighborhood C", crimes: 20 }
+            ];
+
+            // Create a new force simulation for neighborhood bubbles
+            const neighborhoodSimulation = d3.forceSimulation(neighborhoodData)
+                .force("charge", d3.forceManyBody().strength(5))
+                .force("center", d3.forceCenter(width * 0.6, height / 2))
+                .force("collision", d3.forceCollide().radius(d => radiusScale(d.crimes) + 5))
+                .force("x", d3.forceX(width * 0.6).strength(0.05))
+                .force("y", d3.forceY(height / 2).strength(0.05))
+                .alphaDecay(0.02)
+                .alpha(0.1);
+
+            // Draw neighborhood bubbles
+            const neighborhoodBubbles = svg.selectAll("circle")
+                .data(neighborhoodData)
+                .enter()
+                .append("circle")
+                .attr("r", d => radiusScale(d.crimes))
+                .attr("fill", d => colorScale(d.neighborhood))
+                .attr("stroke", "black")
+                .attr("stroke-width", 1);
+
+            // Add neighborhood labels
+            const neighborhoodLabels = svg.selectAll("text")
+                .data(neighborhoodData)
+                .enter()
+                .append("text")
+                .text(d => `${d.neighborhood}: ${d.crimes}`)
+                .attr("text-anchor", "middle")
+                .attr("font-size", d => `${radiusScale(d.crimes) / 3}px`)
+                .attr("fill", "white");
+
+            // Update neighborhood bubble and label positions
+            neighborhoodSimulation.on("tick", () => {
+                neighborhoodBubbles
+                    .attr("cx", d => d.x)
+                    .attr("cy", d => d.y);
+
+                neighborhoodLabels
+                    .attr("x", d => d.x)
+                    .attr("y", d => d.y);
+            });
+
+            // Add a "Go Back" button
+            const goBackButton = svg.append("text")
+                .text("← Go Back")
+                .attr("x", 20)
+                .attr("y", 20)
+                .attr("font-size", "16px")
+                .attr("fill", "blue")
+                .attr("cursor", "pointer")
+                .on("click", () => {
+                    // Reset to the main bubble chart
+                    neighborhoodBubbles.remove();
+                    neighborhoodLabels.remove();
+                    goBackButton.remove();
+                    initializeChart();
+                });
+        }
+
+        // Function to initialize the main bubble chart
+        function initializeChart() {
+            // Reinitialize the main bubble chart
+            bubbles
+                .attr("cx", d => d.x)
+                .attr("cy", d => d.y);
+
+            labels
+                .attr("x", d => d.x)
+                .attr("y", d => d.y);
+        }
+    </script>
+{% endblock %}

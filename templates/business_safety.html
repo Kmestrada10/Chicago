@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Business Safety Ratings</h2>
+    <div id="business-safety-chart"></div>
+    <script src="{{ url_for('static', filename='js/business_safety.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stay Safe Chicago</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <h1>Stay Safe Chicago</h1>
+            <ul>
+                <li><a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' else '' }}"><i class="fas fa-home"></i>Home</a></li>
+                <li><a href="{{ url_for('shootings') }}" class="{{ 'active' if request.endpoint == 'shootings' else '' }}"><i class="fas fa-bullseye"></i>Shootings</a></li>
+                <li><a href="{{ url_for('crimes') }}" class="{{ 'active' if request.endpoint == 'crimes' else '' }}"><i class="fas fa-shield-alt"></i>Crimes</a></li>
+                <li><a href="{{ url_for('air_quality') }}" class="{{ 'active' if request.endpoint == 'air_quality' else '' }}"><i class="fas fa-smog"></i>Air Quality</a></li>
+                <li><a href="{{ url_for('public_transportation') }}" class="{{ 'active' if request.endpoint == 'public_transportation' else '' }}"><i class="fas fa-bus"></i>Public Transportation</a></li>
+                <li><a href="{{ url_for('school_safety') }}" class="{{ 'active' if request.endpoint == 'school_safety' else '' }}"><i class="fas fa-school"></i>School Safety</a></li>
+                <li><a href="{{ url_for('business_safety') }}" class="{{ 'active' if request.endpoint == 'business_safety' else '' }}"><i class="fas fa-building"></i>Business Safety</a></li>
+                <li><a href="{{ url_for('community_resources') }}" class="{{ 'active' if request.endpoint == 'community_resources' else '' }}"><i class="fas fa-hands-helping"></i>Community Resources</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='script/script.js') }}"></script>
+</body>
+</html>

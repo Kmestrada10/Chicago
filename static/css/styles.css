@@ -1,0 +1,210 @@
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #F5F7FA;
+    color: #1E2A38;
+    background-image: url("../images/chicago-pattern.png");
+    background-repeat: repeat;
+    background-blend-mode: overlay;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 250px;
+    background: linear-gradient(180deg, #0A192F, #1E2A38);
+    color: #E0E0E0;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    height: 100%;
+    transition: transform 0.3s ease;
+}
+
+.sidebar h1 {
+    font-size: 24px;
+    margin-bottom: 30px;
+    font-weight: 600;
+    color: #FFFFFF;
+    text-align: center;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    margin: 20px 0;
+}
+
+.sidebar ul li a {
+    color: #E0E0E0;
+    text-decoration: none;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.sidebar ul li a:hover {
+    background-color: rgba(0, 159, 212, 0.1);
+    color: #009FD4;
+}
+
+.sidebar ul li a.active {
+    background-color: #009FD4;
+    color: #FFFFFF;
+}
+
+.sidebar ul li a i {
+    margin-right: 10px;
+}
+
+/* Main Content Styles */
+.main-content {
+    flex: 1;
+    margin-left: 250px; /* Match sidebar width */
+    padding: 30px;
+    background-color: #FFFFFF;
+    min-height: 100vh;
+    transition: margin-left 0.3s ease;
+}
+
+.main-content h2 {
+    color: #1E2A38;
+    font-size: 28px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.main-content p {
+    color: #555;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* Card Styles */
+.card {
+    background-color: #FFFFFF;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card h3 {
+    color: #1E2A38;
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.card p {
+    color: #555;
+    font-size: 14px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+}
+
+/* Loading Animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-spinner {
+    border: 4px solid #F5F5F5;
+    border-top: 4px solid #009FD4;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+/* Center Only Headers */
+.main-content h2 {
+    color: #1E2A38;
+    font-size: 28px;
+    margin-bottom: 20px;
+    font-weight: 600;
+    text-align: center; /* Center the header */
+}
+
+/* Table Styles */
+#crimes-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#crimes-table th, #crimes-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+#crimes-table th {
+    background-color: #f4f4f4;
+}
+
+#neighborhood {
+    padding: 5px;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+
+
+
+/* Maps Autocomplete Dropdown */
+#autocomplete-results {
+    position: absolute;
+    z-index: 1000;
+    width: 100%;
+    max-height: 150px; /* Limit height */
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-top: none;
+    background-color: white;
+}
+
+#autocomplete-results .list-group-item {
+    cursor: pointer;
+}
+
+#autocomplete-results .list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Map Container */
+#map {
+    margin-top: 20px; /* Move the map lower */
+}
